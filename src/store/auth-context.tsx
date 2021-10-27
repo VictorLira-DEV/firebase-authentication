@@ -1,6 +1,4 @@
 import React, { ReactNode, useState, useEffect, useCallback } from "react";
-let logoutTimer: any;
-
 
 interface IAuthContextProvider {
     children: ReactNode;
@@ -36,9 +34,9 @@ const retrieveStoredToken = () => {
         duration: remainingTime,
     };
 };
+let logoutTimer: any = '';
 
 const AuthContext = React.createContext({} as IAuthContext);
-
 export const AuthContextProvider = (props: IAuthContextProvider) => {
     const tokenData = retrieveStoredToken();
     let initialToken: string = "";
@@ -48,6 +46,7 @@ export const AuthContextProvider = (props: IAuthContextProvider) => {
     const [token, setToken] = useState<string>(initialToken);
 
     const userIsLoggedIn = !!token; //it convert a falsy or truthy value into a boolean
+
     const logoutHandler = useCallback(() => {
         setToken("");
         localStorage.removeItem("token");
@@ -60,7 +59,7 @@ export const AuthContextProvider = (props: IAuthContextProvider) => {
 
     const loginHandler = (receiveToken: string, expirationTime: string) => {
         setToken(receiveToken);
-        localStorage.setItem("token", token);
+        localStorage.setItem("token", receiveToken);
         localStorage.setItem("expirationTime", expirationTime);
 
         const remainingTime = calculateRemainingTime(expirationTime);
@@ -69,7 +68,7 @@ export const AuthContextProvider = (props: IAuthContextProvider) => {
 
     useEffect(() => {
         if (tokenData) {
-            console.log(tokenData);
+            console.log(tokenData.duration);
             logoutTimer = setTimeout(logoutHandler, tokenData.duration);
         }
     }, [tokenData, logoutHandler]);
